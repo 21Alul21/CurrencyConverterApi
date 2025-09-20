@@ -1,6 +1,7 @@
 package com.api.currencyconverterservice.controller;
 
-import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,6 +28,8 @@ import com.api.currencyconverterservice.service.FixerApiService;
  @RestController
  @RequestMapping("api/v1")
 public class RateHistoryController {
+    private static final Logger logger =  LoggerFactory
+    .getLogger(RateHistoryController.class);
 
     private final FixerApiService fixerApiService;
     private final CurrencyAPIService currencyAPIService;
@@ -44,7 +47,7 @@ public class RateHistoryController {
             String fixerApiResponse = fixerApiService.rateHistory();
             return fixerApiResponse;
         }catch (Exception e){
-            System.out.println("an error occured while retrieving data from the fixer API: " 
+            logger.error("an error occured while retrieving data from the fixer API: " 
             + e.getMessage());
         }
 
@@ -52,13 +55,9 @@ public class RateHistoryController {
            String currencyAPIResponse = currencyAPIService.rateHistory();
            return currencyAPIResponse;
         }catch (Exception e){
-            System.out.println("an error occured while retrieving data from the CurrencyAPI: " 
+            logger.error("an error occured while retrieving data from the CurrencyAPI: " 
             + e.getMessage());
         }
-
-
-        
-
 
         return null;
         

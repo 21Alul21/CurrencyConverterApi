@@ -5,6 +5,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.api.currencyconverterservice.service.CurrencyAPIService;
 import com.api.currencyconverterservice.service.FixerApiService;
 
@@ -39,7 +42,9 @@ import java.util.HashMap;
 @RequestMapping("api/v1")
 public class CurrencyConversionController {
 
-   
+    private static final Logger logger = LoggerFactory
+    .getLogger(CurrencyConversionController.class);
+
     private final FixerApiService fixerApiService;
     private final CurrencyAPIService currencyAPIService;
 
@@ -57,13 +62,13 @@ public Mono<HashMap<String, Object>> convertCurrency(@RequestParam String from,
 
     Mono<JsonNode> fixerResponse = fixerApiService.convertCurrency(from, to, amount)
             .onErrorResume(e -> {
-                System.out.println("Fixer API error: " + e.getMessage());
+                logger.error("Fixer API error: " + e.getMessage());
                 return Mono.empty();
             });
 
     Mono<JsonNode> currencyAPIResponse = currencyAPIService.convertCurrency(amount, to)
             .onErrorResume(e -> {
-                System.out.println("CurrencyAPI error: " + e.getMessage());
+                logger.error("CurrencyAPI error: " + e.getMessage());
                 return Mono.empty();
             });
 
@@ -113,11 +118,4 @@ public Mono<HashMap<String, Object>> convertCurrency(@RequestParam String from,
             });
     }
 }
-
-
-
-
-
-
-
 

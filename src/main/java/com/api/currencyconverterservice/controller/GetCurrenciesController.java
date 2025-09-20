@@ -4,7 +4,9 @@ package com.api.currencyconverterservice.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.ILoggerFactory;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,6 +30,9 @@ import com.api.currencyconverterservice.service.OpenExchangeApiService;
 @RestController
 @RequestMapping("api/v1")
 public class GetCurrenciesController {
+    private static final Logger logger = LoggerFactory
+    .getLogger(GetCurrenciesController.class);
+
     private final FixerApiService fixerApiService;
     private final OpenExchangeApiService openExchangeApiService;
     private final CurrencyAPIService currencyAPIService;
@@ -43,19 +48,19 @@ public class GetCurrenciesController {
         try{
             return ResponseEntity.status(HttpStatus.ACCEPTED).body(fixerApiService.getCurrencies());
         }catch (Exception e){
-           System.out.println("error occured in fixerAPI service while retrieving currencies: " + e.getMessage()); 
+           logger.error("error occured in fixerAPI service while retrieving currencies: " + e.getMessage()); 
         }
 
         try{
             return ResponseEntity.status(HttpStatus.ACCEPTED).body(openExchangeApiService.getCurrencies());
         }catch (Exception e){
-            System.out.println("error occured in openexchangeApi service service while retrieving currencies: " + e.getMessage());
+            logger.error("error occured in openexchangeApi service service while retrieving currencies: " + e.getMessage());
         }
 
         try{
             return ResponseEntity.status(HttpStatus.ACCEPTED).body(currencyAPIService.getCurrencies());
         }catch(Exception e){
-             System.out.println("error occured in currencyAPI service while retrieving currencies: " + e.getMessage());
+             logger.error("error occured in currencyAPI service while retrieving currencies: " + e.getMessage());
             
         return null;
     
