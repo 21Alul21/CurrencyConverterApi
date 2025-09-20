@@ -1,6 +1,7 @@
 package com.api.currencyconverterservice.service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -43,6 +44,22 @@ public class CurrencyAPIService {
         .header("apikey", accessKey)
         .retrieve()
         .bodyToMono(JsonNode.class);
+    }
+
+
+    public String rateHistory(){
+
+        LocalDate dateToday = LocalDate.now();
+        String url = "https://api.currencyapi.com/v3/historical?date=" + 
+        dateToday.toString();
+
+        return webClient
+        .get()
+        .uri(url)
+        .header("apikey", accessKey)
+        .retrieve()
+        .bodyToMono(String.class)
+        .block();
     }
 
 }

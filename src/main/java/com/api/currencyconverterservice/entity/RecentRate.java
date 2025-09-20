@@ -19,8 +19,8 @@ public class RecentRate{
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id; 
 
+    private String baseSymbol;
+    private String currencySymbol;
     private LocalDateTime requestTime;
-    private String fromCurrency;
-    private String toCurrency;
-    private BigDecimal convertedAmount;
+    private BigDecimal currencyRate;
 }
