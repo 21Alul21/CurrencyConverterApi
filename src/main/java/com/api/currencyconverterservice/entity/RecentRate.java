@@ -1,10 +1,7 @@
 package com.api.currencyconverterservice.entity;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-
-
-
-
 import java.util.UUID;
 
 import jakarta.persistence.*;
@@ -25,8 +22,5 @@ public class RecentRate{
     private LocalDateTime requestTime;
     private String fromCurrency;
     private String toCurrency;
-    private BigDecimal baseAmount;
     private BigDecimal convertedAmount;
-
-
 }

@@ -1,7 +1,18 @@
 package com.api.currencyconverterservice.controller;
 
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
+
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.api.currencyconverterservice.service.CurrencyAPIService;
+import com.api.currencyconverterservice.service.FixerApiService;
+import com.api.currencyconverterservice.service.OpenExchangeApiService;
 
 /*This module contains the controller for getting list 
  * of supported currencies and their symbols from external APIs
@@ -13,14 +24,6 @@ import org.springframework.http.ResponseEntity;
  * --------------------------------------------------------
  * 
  */
-
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.api.currencyconverterservice.service.CurrencyAPIService;
-import com.api.currencyconverterservice.service.FixerApiService;
-import com.api.currencyconverterservice.service.OpenExchangeApiService;
 
 @RestController
 @RequestMapping("api/v1")
@@ -52,8 +55,12 @@ public class GetCurrenciesController {
         try{
             return ResponseEntity.status(HttpStatus.ACCEPTED).body(currencyAPIService.getCurrencies());
         }catch(Exception e){
-            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body("error occured in currencyAPI service while retrieving currencies: " + e.getMessage()); 
-        }
+             System.out.println("error occured in currencyAPI service while retrieving currencies: " + e.getMessage());
+            
+        return null;
+    
     }
+
+}
 
 }
