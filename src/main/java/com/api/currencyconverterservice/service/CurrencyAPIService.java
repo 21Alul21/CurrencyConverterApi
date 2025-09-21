@@ -3,6 +3,9 @@ package com.api.currencyconverterservice.service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -13,6 +16,7 @@ import reactor.core.publisher.Mono;
 
 @Service
 public class CurrencyAPIService {
+    private static final Logger logger = LoggerFactory.getLogger(CurrencyAPIService.class);
 
     private final WebClient webClient;
 
@@ -43,7 +47,11 @@ public class CurrencyAPIService {
         .uri(url)
         .header("apikey", accessKey)
         .retrieve()
-        .bodyToMono(JsonNode.class);
+        .bodyToMono(JsonNode.class)
+        .onErrorResume(e -> {
+                logger.error("CurrencyAPI error: " + e.getMessage());
+                return Mono.empty();
+            });
     }
 
 

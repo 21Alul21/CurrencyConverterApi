@@ -21,9 +21,9 @@ import java.util.HashMap;
  * It exposes the endpoint for converting between 
  * different currencies using different external APIs (primary and secondary).
  * 
- * --------------------------------------------------------------------- 
- *    send GET request to api/v1/convert?from=USD&to=EUR&amount=100
- * ---------------------------------------------------------------------
+ * ---------------------------------------------------------------------- 
+ *      send GET request to api/v1/convert?from=USD&to=EUR&amount=100
+ * ----------------------------------------------------------------------
  * 
  * - The external fixer API service allows you to freely convert 
  * from any currency to another,
@@ -54,24 +54,16 @@ public class CurrencyConversionController {
         this.currencyAPIService = currencyAPIService;
     }
 
+
     @GetMapping("/convert")
-public Mono<HashMap<String, Object>> convertCurrency(@RequestParam String from,
+    public Mono<HashMap<String, Object>> convertCurrency(@RequestParam String from,
                                                     @RequestParam String to,
                                                     @RequestParam BigDecimal amount) {
     HashMap<String, Object> response = new HashMap<>();
 
-    Mono<JsonNode> fixerResponse = fixerApiService.convertCurrency(from, to, amount)
-            .onErrorResume(e -> {
-                logger.error("Fixer API error: " + e.getMessage());
-                return Mono.empty();
-            });
-
-    Mono<JsonNode> currencyAPIResponse = currencyAPIService.convertCurrency(amount, to)
-            .onErrorResume(e -> {
-                logger.error("CurrencyAPI error: " + e.getMessage());
-                return Mono.empty();
-            });
-
+    Mono<JsonNode> fixerResponse = fixerApiService.convertCurrency(from, to, amount);
+    Mono<JsonNode> currencyAPIResponse = currencyAPIService.convertCurrency(amount, to);
+            
     return Mono.zip(fixerResponse.defaultIfEmpty(null), currencyAPIResponse.defaultIfEmpty(null))
             .map(tuple -> {
                 JsonNode fixerNode = tuple.getT1();
