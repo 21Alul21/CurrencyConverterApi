@@ -5,8 +5,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+// import org.slf4j.Logger;
+// import org.slf4j.LoggerFactory;
 
 import com.api.currencyconverterservice.service.CurrencyAPIService;
 import com.api.currencyconverterservice.service.FixerApiService;
@@ -42,8 +42,8 @@ import java.util.HashMap;
 @RequestMapping("api/v1")
 public class CurrencyConversionController {
 
-    private static final Logger logger = LoggerFactory
-    .getLogger(CurrencyConversionController.class);
+    // private static final Logger logger = LoggerFactory
+    // .getLogger(CurrencyConversionController.class);
 
     private final FixerApiService fixerApiService;
     private final CurrencyAPIService currencyAPIService;
@@ -59,6 +59,7 @@ public class CurrencyConversionController {
     public Mono<HashMap<String, Object>> convertCurrency(@RequestParam String from,
                                                     @RequestParam String to,
                                                     @RequestParam BigDecimal amount) {
+                                                        
     HashMap<String, Object> response = new HashMap<>();
 
     Mono<JsonNode> fixerResponse = fixerApiService.convertCurrency(from, to, amount);
@@ -69,16 +70,19 @@ public class CurrencyConversionController {
                 JsonNode fixerNode = tuple.getT1();
                 JsonNode currencyAPINode = tuple.getT2();
 
+                // Fixer API allows conversion from any currency to another
                 BigDecimal fixerConvertedValue = null;
                 if (fixerNode != null && fixerNode.has("result")) {
                     fixerConvertedValue = new BigDecimal(fixerNode.get("result").asText());
                 }
 
+                // CurrencyAPI only allows conversion from USD to other currencies
                 BigDecimal currencyAPIConvertedValue = null;
                 if (currencyAPINode != null && currencyAPINode.has("data") && currencyAPINode.get("data").has(to)) {
                     currencyAPIConvertedValue = new BigDecimal(currencyAPINode.get("data").get(to).asText());
                 }
 
+                // retrn average if both APIs return values and from is USD
                 if (fixerConvertedValue != null && currencyAPIConvertedValue != null && from.equals("USD")) {
                     BigDecimal averageConvertedValue = fixerConvertedValue.add(currencyAPIConvertedValue)
                             .divide(BigDecimal.valueOf(2));

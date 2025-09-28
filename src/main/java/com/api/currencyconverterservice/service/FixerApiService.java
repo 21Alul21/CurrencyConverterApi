@@ -41,15 +41,23 @@ public class FixerApiService {
         String url = "http://data.fixer.io/api/convert?access_key="
          + accessKey + "&from=" + from + "&to=" + to + "&amount=" + String.valueOf(amount);
 
-         System.out.println("fixer api url: " + url);
+         logger.info("in the fixer api service trying to call the convert external api");
+         logger.info("fixer api url: " + url);
+
          
         return webClient
         .get()
         .uri(url)
         .retrieve()
+        .onStatus(
+            status -> status.is5xxServerError(),
+            clientResponse -> clientResponse.bodyToMono(String.class)
+                .doOnNext(body -> logger.warn("Fixer API returned 5xx error: " + body))
+                .then(Mono.error(new RuntimeException("Fixer API 5xx error")))
+        )
         .bodyToMono(JsonNode.class)
         .onErrorResume(e -> {
-                logger.warn("Fixer API has failed, switching to Currency API: " + e.getMessage());
+                logger.warn("Fixer API has failed: " + e.getMessage());
                 return Mono.empty();
             });
     }
@@ -60,6 +68,8 @@ public class FixerApiService {
         LocalDate dateToday = LocalDate.now(); 
         String url = "http://data.fixer.io/api/" + dateToday.toString() + 
         "?access_key=" + accessKey + "&base=USD";
+
+        logger.info(url);
         return webClient
         .get()
         .uri(url)
@@ -73,6 +83,10 @@ public class FixerApiService {
 
         String url = "http://data.fixer.io/api/latest?access_key="
          + accessKey + "&base=" + base ;
+
+
+         logger.info(url);
+
         return webClient
         .get()
         .uri(url)

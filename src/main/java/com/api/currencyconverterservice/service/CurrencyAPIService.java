@@ -42,6 +42,11 @@ public class CurrencyAPIService {
 
     public Mono<JsonNode> convertCurrency(BigDecimal value, String to){
         String url = "https://api.currencyapi.com/v3/convert?value=" + String.valueOf(value);
+       
+       logger.info("in the currencyAPI service, trying to call the convert external api");
+       logger.info("fixer api url: " + url);
+
+
         return webClient
         .get()
         .uri(url)

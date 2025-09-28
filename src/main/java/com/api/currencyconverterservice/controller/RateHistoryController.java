@@ -1,8 +1,11 @@
 package com.api.currencyconverterservice.controller;
 
+import java.util.HashMap;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.service.annotation.GetExchange;
@@ -41,11 +44,11 @@ public class RateHistoryController {
     }
 
     @GetExchange("/health")
-    public String rateHistory(){
+    public ResponseEntity<Object> rateHistory(){
 
         try{
             String fixerApiResponse = fixerApiService.rateHistory();
-            return fixerApiResponse;
+            return ResponseEntity.status(HttpStatus.FOUND).body(fixerApiResponse);
         }catch (Exception e){
             logger.error("an error occured while retrieving data from the fixer API: " 
             + e.getMessage());
@@ -53,13 +56,15 @@ public class RateHistoryController {
 
         try{
            String currencyAPIResponse = currencyAPIService.rateHistory();
-           return currencyAPIResponse;
+           return ResponseEntity.status(HttpStatus.FOUND).body(currencyAPIResponse);
         }catch (Exception e){
             logger.error("an error occured while retrieving data from the CurrencyAPI: " 
             + e.getMessage());
         }
 
-        return null;
+        HashMap<String, Object> errHashMap = new HashMap<>();
+        errHashMap.put("warning", "both external APIs have failed, please try again later");
+        return ResponseEntity.ok(errHashMap);
         
     }
 
