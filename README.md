@@ -3,7 +3,7 @@ This project titled CurrencyConverterApi is a backend project
 built with Java and Spring Boot framework.
 
 ## Project Scope
-The project involes the integrating multiple
+The project involes integrating multiple
 third party APIs for aggregating and returning data
 with little chance for failure—this is achieved by
 implementing a failover mechanism that switches to 
