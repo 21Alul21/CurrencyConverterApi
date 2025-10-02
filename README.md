@@ -18,7 +18,7 @@ from=USD&to=EUR&amount=100)
 - Rates history within the last 24 hours (GET api/v1/health)
 
 ## Features
-- Caching (using redis)
+- Caching (simple in-memory caching)
 - Containerization (Docker)
 - Database for storing recent rate requests
 
