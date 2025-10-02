@@ -14,7 +14,7 @@ The project provide endpoints for:
 - Realtime conversion from one currency to another (GET api/v1/convert?
 from=USD&to=EUR&amount=100)
 - Current rates of all available currencies (GET api/v1/rates?base=USD)
-- Getting a list of supposted currencies (GET api/v1/currencies)
+- Getting a list of supported currencies (GET api/v1/currencies)
 - Rates history within the last 24 hours (GET api/v1/health)
 
 ## Features
