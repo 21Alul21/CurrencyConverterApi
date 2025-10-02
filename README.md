@@ -1,4 +1,4 @@
-# CurrencyConverterApi
+# CurrencyConverterAPI
 This project titled CurrencyConverterApi is a backend project 
 built with Java and Spring Boot framework.
 
