@@ -37,6 +37,9 @@ public class FixerApiService {
     }
 
 
+    // checks the cache memory for matching request that have lived 
+    // for no more than 5 mins, before calling external API.
+    @Cacheable(value = "currencyConversions", key = "#from + '-' + #to + '-' + #amount")
     public Mono<JsonNode> convertCurrency(String from, String to, BigDecimal amount){
         String url = "http://data.fixer.io/api/convert?access_key="
          + accessKey + "&from=" + from + "&to=" + to + "&amount=" + String.valueOf(amount);
