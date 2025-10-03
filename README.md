@@ -24,6 +24,3 @@ from=USD&to=EUR&amount=100)
 - Containerization (Docker)
 - Database for storing recent rate requests
 
-
-## Status
-Ongoing
