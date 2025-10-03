@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -52,17 +53,7 @@ public class FixerApiService {
         .get()
         .uri(url)
         .retrieve()
-        .onStatus(
-            status -> status.is5xxServerError(),
-            clientResponse -> clientResponse.bodyToMono(String.class)
-                .doOnNext(body -> logger.warn("Fixer API returned 5xx error: " + body))
-                .then(Mono.error(new RuntimeException("Fixer API 5xx error")))
-        )
-        .bodyToMono(JsonNode.class)
-        .onErrorResume(e -> {
-                logger.warn("Fixer API has failed: " + e.getMessage());
-                return Mono.empty();
-            });
+        .bodyToMono(JsonNode.class);
     }
 
 
@@ -88,7 +79,7 @@ public class FixerApiService {
          + accessKey + "&base=" + base ;
 
 
-         logger.info(url);
+         logger.info("fixer API URL {}", url);
 
         return webClient
         .get()
@@ -98,7 +89,7 @@ public class FixerApiService {
         .onErrorResume(e ->{
             logger.warn("an error occured while fetching data from the fixer API, Switching to OpenExchange API" 
             + e.getMessage());
-            return Mono.empty();
+            return Mono.just("");
         });
     }
     

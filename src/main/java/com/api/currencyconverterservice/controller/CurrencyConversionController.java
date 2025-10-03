@@ -5,8 +5,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-// import org.slf4j.Logger;
-// import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.api.currencyconverterservice.service.CurrencyAPIService;
 import com.api.currencyconverterservice.service.FixerApiService;
@@ -42,9 +42,7 @@ import java.util.HashMap;
 @RequestMapping("api/v1")
 public class CurrencyConversionController {
 
-    // private static final Logger logger = LoggerFactory
-    // .getLogger(CurrencyConversionController.class);
-
+    private static final Logger logger = LoggerFactory.getLogger(CurrencyConversionController.class);
     private final FixerApiService fixerApiService;
     private final CurrencyAPIService currencyAPIService;
 
@@ -62,10 +60,18 @@ public class CurrencyConversionController {
                                                         
     HashMap<String, Object> response = new HashMap<>();
 
-    Mono<JsonNode> fixerResponse = fixerApiService.convertCurrency(from, to, amount);
-    Mono<JsonNode> currencyAPIResponse = currencyAPIService.convertCurrency(amount, to);
+    Mono<JsonNode> fixerResponse = fixerApiService.convertCurrency(from, to, amount)
+    .onErrorResume(e -> {
+        logger.error("Fixer API error: " + e.getMessage());
+        return Mono.just((JsonNode) null);
+    });
+    Mono<JsonNode> currencyAPIResponse = currencyAPIService.convertCurrency(amount, to)
+    .onErrorResume(e -> {
+        logger.error("CurrencyAPI error: " + e.getMessage());
+        return Mono.just((JsonNode) null);
+    });
             
-    return Mono.zip(fixerResponse.defaultIfEmpty(null), currencyAPIResponse.defaultIfEmpty(null))
+    return Mono.zip(fixerResponse, currencyAPIResponse)
             .map(tuple -> {
                 JsonNode fixerNode = tuple.getT1();
                 JsonNode currencyAPINode = tuple.getT2();
@@ -82,7 +88,7 @@ public class CurrencyConversionController {
                     currencyAPIConvertedValue = new BigDecimal(currencyAPINode.get("data").get(to).asText());
                 }
 
-                // retrn average if both APIs return values and from is USD
+                // return average if both APIs return values and from is USD
                 if (fixerConvertedValue != null && currencyAPIConvertedValue != null && from.equals("USD")) {
                     BigDecimal averageConvertedValue = fixerConvertedValue.add(currencyAPIConvertedValue)
                             .divide(BigDecimal.valueOf(2));
@@ -109,7 +115,7 @@ public class CurrencyConversionController {
             })
             .onErrorResume(e -> {
                 response.put("success", false);
-                response.put("message", "An error occurred: " + e.getMessage());
+                response.put("message", "An error occurred");
                 return Mono.just(response);
             });
     }

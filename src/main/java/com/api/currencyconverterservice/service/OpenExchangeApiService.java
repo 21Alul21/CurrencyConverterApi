@@ -50,7 +50,7 @@ public class OpenExchangeApiService {
          .onErrorResume(e -> {
             logger.error("an error occured while connecting to the OpenExchange external API: "
             + e.getMessage());
-            return Mono.empty();
+            return Mono.just("");
         });
     }
     

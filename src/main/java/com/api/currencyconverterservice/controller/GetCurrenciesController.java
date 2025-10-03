@@ -4,6 +4,8 @@ package com.api.currencyconverterservice.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,6 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.api.currencyconverterservice.service.CurrencyAPIService;
 import com.api.currencyconverterservice.service.FixerApiService;
 import com.api.currencyconverterservice.service.OpenExchangeApiService;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 /*This module contains the controller for getting list 
  * of supported currencies and their symbols from external APIs
@@ -43,7 +47,7 @@ public class GetCurrenciesController {
     }
 
     @GetMapping("/currencies")
-    public ResponseEntity<String> getCurrencies(){
+    public ResponseEntity<?> getCurrencies(){
         try{
             return ResponseEntity.status(HttpStatus.ACCEPTED).body(fixerApiService.getCurrencies());
         }catch (Exception e){
@@ -61,7 +65,8 @@ public class GetCurrenciesController {
         }catch(Exception e){
              logger.error("error occured in currencyAPI service while retrieving currencies: " + e.getMessage());
             
-        return null;
+        return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED)
+        .body(Map.of("message", "service currently unavailable, please try again later.."));
     
     }
 

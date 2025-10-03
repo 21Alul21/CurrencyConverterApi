@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Value;
+
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -40,7 +41,7 @@ public class CurrencyAPIService {
     }
 
 
-    @Cacheable(value = "currencyConversions", key = "#value + '-' + #to")
+    // @Cacheable(value = "currencyConversions", key = "#value + '-' + #to")
     public Mono<JsonNode> convertCurrency(BigDecimal value, String to){
         String url = "https://api.currencyapi.com/v3/convert?value=" + String.valueOf(value);
        
@@ -53,11 +54,7 @@ public class CurrencyAPIService {
         .uri(url)
         .header("apikey", accessKey)
         .retrieve()
-        .bodyToMono(JsonNode.class)
-        .onErrorResume(e -> {
-                logger.error("CurrencyAPI error: " + e.getMessage());
-                return Mono.empty();
-            });
+        .bodyToMono(JsonNode.class);
     }
 
 

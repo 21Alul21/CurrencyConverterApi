@@ -50,10 +50,9 @@ public class RatesController {
 
     @GetMapping("/rates")
 public Mono<Object> getRates(@RequestParam String base) {
-    Mono<String> fixerResponse = fixerApiService.getRates(base)
-        .onErrorResume(e -> Mono.just(""));
-    Mono<String> openExchangeResponse = openExchangeApiService.getRates(base)
-        .onErrorResume(e -> Mono.just(""));
+    
+    Mono<String> fixerResponse = fixerApiService.getRates(base);
+    Mono<String> openExchangeResponse = openExchangeApiService.getRates(base);
 
     return Mono.zip(fixerResponse, openExchangeResponse)
         .map(tuple -> {
@@ -68,8 +67,12 @@ public Mono<Object> getRates(@RequestParam String base) {
                 // persisting request info to db
                 recentRate.setRequestTime(LocalDateTime.now());
                  recentRate.setBaseSymbol(base);
-                 recentRate.setStatus(true);      
-                 recentRateRepository.save(recentRate);
+                 recentRate.setStatus(true);
+
+                  // persisting data in a non-blocking way
+                  Mono.fromRunnable(() -> recentRateRepository
+                  .save(recentRate))
+                  .subscribe();
                     
                 return fixerTupple;
             } else if (!openExchangeTupple.isEmpty()) {
