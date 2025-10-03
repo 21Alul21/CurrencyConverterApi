@@ -76,8 +76,12 @@ public Mono<Object> getRates(@RequestParam String base) {
                 
                   recentRate.setRequestTime(LocalDateTime.now());
                   recentRate.setBaseSymbol(base);
-                  recentRate.setStatus(true);      
-                  recentRateRepository.save(recentRate);
+                  recentRate.setStatus(true);
+
+                // persisting data in a non-blocking way
+                  Mono.fromRunnable(() -> recentRateRepository
+                  .save(recentRate))
+                  .subscribe();
                     return openExchangeTupple;
             } else {
                 HashMap<String, Object> hm = new HashMap<>();
@@ -86,7 +90,8 @@ public Mono<Object> getRates(@RequestParam String base) {
                 recentRate.setRequestTime(LocalDateTime.now());
                  recentRate.setBaseSymbol(base);
                  recentRate.setStatus(false);      
-                 recentRateRepository.save(recentRate);
+                 Mono.fromRunnable(() -> recentRateRepository.save(recentRate))
+                 .subscribe();
                 return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(hm);
             }
         })
