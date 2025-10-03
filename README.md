@@ -2,6 +2,8 @@
 This project titled CurrencyConverterApi is a backend project 
 built with Java and Spring Boot framework.
 
+![Picture showng openAPI UI interface of the the routes](https://github.com/21Alul21/CurrencyConverterApi/blob/main/Screenshot%202025-10-03%20192917.png)
+
 ## Project Scope
 The project involes integrating multiple
 third party APIs for aggregating and returning data
