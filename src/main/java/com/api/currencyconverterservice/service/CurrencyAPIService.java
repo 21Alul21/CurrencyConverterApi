@@ -40,6 +40,7 @@ public class CurrencyAPIService {
     }
 
 
+    @Cacheable(value = "currencyConversions", key = "#value + '-' + #to")
     public Mono<JsonNode> convertCurrency(BigDecimal value, String to){
         String url = "https://api.currencyapi.com/v3/convert?value=" + String.valueOf(value);
        
