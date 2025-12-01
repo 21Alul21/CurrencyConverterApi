@@ -94,7 +94,7 @@ public class ResponseService {
                 .onErrorResume(e -> {
                     logger.error("Unexpected error: {}", e.getMessage());
                     response.put("success", false);
-                    response.put("message", "An unexpected error occurred: " + e.getMessage());
+                    response.put("message", "An unexpected error occurred");
                     return Mono.just(response);
                 });
     }

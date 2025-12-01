@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import reactor.core.publisher.Mono;
 
 @Service
 public class RateHistoryCircuitBreakerService {
@@ -24,7 +25,7 @@ public class RateHistoryCircuitBreakerService {
     }
 
     @CircuitBreaker(name = "fixerRateHistory", fallbackMethod = "currencyRateHistory")
-    public String fixerRateHistory(){
+    public Mono<String> fixerRateHistory(){
         logger.info("Inside the fixerRate History method");
         return fixerApiService.rateHistory();
     }

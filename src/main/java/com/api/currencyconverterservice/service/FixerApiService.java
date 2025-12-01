@@ -27,6 +27,7 @@ public class FixerApiService {
         this.webClient = webClient;
     }
 
+    @Cacheable(value = "currency_symbols")
     public Mono<String> getCurrencies(){
      String url = "http://data.fixer.io/api/symbols?access_key=" + accessKey;
        logger.info(url);
@@ -36,14 +37,9 @@ public class FixerApiService {
              .uri(url)
              .exchangeToMono(response -> response.bodyToMono(String.class))
              .doOnError(e -> logger.error("Fixer API error", e));
-            
-       
     }
 
 
-    // checks the cache memory for matching request that have lived 
-    // for no more than 5 mins, before calling external API.
-    @Cacheable(value = "currencyConversions", key = "#from + '-' + #to + '-' + #amount")
     public Mono<JsonNode> convertCurrency(String from, String to, BigDecimal amount){
         String url = "http://data.fixer.io/api/convert?access_key="
          + accessKey + "&from=" + from + "&to=" + to + "&amount=" + String.valueOf(amount);
