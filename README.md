@@ -25,5 +25,6 @@ from=USD&to=EUR&amount=100)
 - Containerization (Docker and Docker Compose)
 - Database for storing recent rate requests (JPA/Hibernate)
 - Non-blocking HTTP request (WebClient)
+- Exception Handling (RestcontrollerAdvice and ExceptionHandler)
   
 
