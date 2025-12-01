@@ -27,14 +27,17 @@ public class FixerApiService {
         this.webClient = webClient;
     }
 
-    public String getCurrencies(){
+    public Mono<String> getCurrencies(){
      String url = "http://data.fixer.io/api/symbols?access_key=" + accessKey;
-        return webClient
-        .get()
-        .uri(url)
-        .retrieve()
-        .bodyToMono(String.class)
-        .block();
+       logger.info(url);
+
+       return webClient
+             .get()
+             .uri(url)
+             .exchangeToMono(response -> response.bodyToMono(String.class))
+             .doOnError(e -> logger.error("Fixer API error", e));
+            
+       
     }
 
 
@@ -52,12 +55,13 @@ public class FixerApiService {
         return webClient
         .get()
         .uri(url)
-        .retrieve()
-        .bodyToMono(JsonNode.class);
+        .exchangeToMono(response -> response.bodyToMono(JsonNode.class))
+        .doOnError(e -> logger.error("currencyConverter API error", e));
+        
     }
 
 
-    public String rateHistory(){
+    public Mono<String> rateHistory(){
 
         LocalDate dateToday = LocalDate.now(); 
         String url = "http://data.fixer.io/api/" + dateToday.toString() + 
@@ -67,9 +71,8 @@ public class FixerApiService {
         return webClient
         .get()
         .uri(url)
-        .retrieve()
-        .bodyToMono(String.class)
-        .block();
+        .exchangeToMono(response -> response.bodyToMono(String.class))
+        .doOnError(e -> logger.error("fixer API failure", e));
     }
 
 
@@ -84,13 +87,8 @@ public class FixerApiService {
         return webClient
         .get()
         .uri(url)
-        .retrieve()
-        .bodyToMono(String.class)
-        .onErrorResume(e ->{
-            logger.warn("an error occured while fetching data from the fixer API, Switching to OpenExchange API" 
-            + e.getMessage());
-            return Mono.just("");
-        });
+        .exchangeToMono(response -> response.bodyToMono(String.class))
+        .doOnError(e -> logger.error("an error occured while connecting to the Fixer external API", e));
     }
     
 }

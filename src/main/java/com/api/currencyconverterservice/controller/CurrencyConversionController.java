@@ -1,5 +1,6 @@
 package com.api.currencyconverterservice.controller;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -51,11 +52,11 @@ public class CurrencyConversionController {
      * @return A Mono emitting the conversion result
      */
     @GetMapping("/convert")
-    public Mono<Map<String, Object>> convertCurrency(
+    public ResponseEntity<Mono<Map<String, Object>>> convertCurrency(
             @RequestParam String from,
             @RequestParam String to,
             @RequestParam BigDecimal amount) {
 
-        return responseService.convertCurrency(from, to, amount);
+        return ResponseEntity.ok(responseService.convertCurrency(from, to, amount));
     }
 }

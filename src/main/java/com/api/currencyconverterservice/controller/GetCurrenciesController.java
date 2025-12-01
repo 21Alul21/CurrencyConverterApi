@@ -1,23 +1,17 @@
 package com.api.currencyconverterservice.controller;
 
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
-import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.api.currencyconverterservice.service.CurrencyAPIService;
-import com.api.currencyconverterservice.service.FixerApiService;
-import com.api.currencyconverterservice.service.OpenExchangeApiService;
+import com.api.currencyconverterservice.service.GetCurrencyCircuitBreakerService;
 
-import jakarta.servlet.http.HttpServletRequest;
+import reactor.core.publisher.Mono;
+
+
 
 /*This module contains the controller for getting list 
  * of supported currencies and their symbols from external APIs
@@ -33,43 +27,22 @@ import jakarta.servlet.http.HttpServletRequest;
 @RestController
 @RequestMapping("api/v1")
 public class GetCurrenciesController {
-    private static final Logger logger = LoggerFactory
-    .getLogger(GetCurrenciesController.class);
 
-    private final FixerApiService fixerApiService;
-    private final OpenExchangeApiService openExchangeApiService;
-    private final CurrencyAPIService currencyAPIService;
 
-    public GetCurrenciesController(FixerApiService fixerApiService, OpenExchangeApiService openExchangeApiService, CurrencyAPIService currencyAPIService){
-        this.fixerApiService = fixerApiService;
-        this.openExchangeApiService = openExchangeApiService;
-        this.currencyAPIService = currencyAPIService;
+    private final GetCurrencyCircuitBreakerService getCurrencyCircuitBreakerService;
+
+    public GetCurrenciesController(GetCurrencyCircuitBreakerService getCurrencyCircuitBreakerService){
+        this.getCurrencyCircuitBreakerService = getCurrencyCircuitBreakerService;
     }
 
     @GetMapping("/currencies")
-    public ResponseEntity<?> getCurrencies(){
-        try{
-            return ResponseEntity.status(HttpStatus.ACCEPTED).body(fixerApiService.getCurrencies());
-        }catch (Exception e){
-           logger.error("error occured in fixerAPI service while retrieving currencies: " + e.getMessage()); 
-        }
+    public ResponseEntity<Mono<String>> getCurrencies(){
 
-        try{
-            return ResponseEntity.status(HttpStatus.ACCEPTED).body(openExchangeApiService.getCurrencies());
-        }catch (Exception e){
-            logger.error("error occured in openexchangeApi service service while retrieving currencies: " + e.getMessage());
-        }
-
-        try{
-            return ResponseEntity.status(HttpStatus.ACCEPTED).body(currencyAPIService.getCurrencies());
-        }catch(Exception e){
-             logger.error("error occured in currencyAPI service while retrieving currencies: " + e.getMessage());
-            
-        return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED)
-        .body(Map.of("message", "service currently unavailable, please try again later.."));
-    
+    /**
+     * provides supported currencies for conversion
+     * @return A JSON of the of supported currencies and their symbols
+     */
+     return ResponseEntity.ok(getCurrencyCircuitBreakerService
+                          .fixerAPIGetCurrencies());
     }
-
-}
-
 }

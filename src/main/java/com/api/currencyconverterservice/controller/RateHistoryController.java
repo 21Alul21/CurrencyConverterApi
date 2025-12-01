@@ -1,11 +1,6 @@
 package com.api.currencyconverterservice.controller;
 
-import java.util.HashMap;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -13,6 +8,9 @@ import org.springframework.web.service.annotation.GetExchange;
 
 import com.api.currencyconverterservice.service.CurrencyAPIService;
 import com.api.currencyconverterservice.service.FixerApiService;
+import com.api.currencyconverterservice.service.RateHistoryCircuitBreakerService;
+
+import reactor.core.publisher.Mono;
 
 /*
  * This module contains the RateHistoryController.
@@ -32,41 +30,25 @@ import com.api.currencyconverterservice.service.FixerApiService;
  @RestController
  @RequestMapping("api/v1")
 public class RateHistoryController {
-    private static final Logger logger =  LoggerFactory
-    .getLogger(RateHistoryController.class);
+   
+    private final RateHistoryCircuitBreakerService rateHistoryCircuitBreakerService;
+    
 
-    private final FixerApiService fixerApiService;
-    private final CurrencyAPIService currencyAPIService;
-
-    public RateHistoryController(FixerApiService fixerApiService, 
-    CurrencyAPIService currencyAPIService){
-        this.fixerApiService = fixerApiService;
-        this.currencyAPIService = currencyAPIService;
+    public RateHistoryController(RateHistoryCircuitBreakerService rateHistoryCircuitBreakerService){
+        this.rateHistoryCircuitBreakerService = rateHistoryCircuitBreakerService;
     }
 
+
     @GetExchange("/health")
-    public ResponseEntity<Object> rateHistory(){
+    public ResponseEntity<Mono<String>> rateHistory(){
 
-        try{
-            String fixerApiResponse = fixerApiService.rateHistory();
-            return ResponseEntity.status(HttpStatus.FOUND).body(fixerApiResponse);
-        }catch (Exception e){
-            logger.error("an error occured while retrieving data from the fixer API: " 
-            + e.getMessage());
-        }
+    /**
+     * Provides currency rates within the last 24 hours only
+     * @return A JSON containing currency rates within 24 hours range
+     */
 
-        try{
-           String currencyAPIResponse = currencyAPIService.rateHistory();
-           return ResponseEntity.status(HttpStatus.FOUND).body(currencyAPIResponse);
-        }catch (Exception e){
-            logger.error("an error occured while retrieving data from the CurrencyAPI: " 
-            + e.getMessage());
-        }
-
-        HashMap<String, Object> errHashMap = new HashMap<>();
-        errHashMap.put("warning", "both external APIs have failed, please try again later");
-        return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(errHashMap);
-        
+         return ResponseEntity.status(HttpStatus.FOUND)
+         .body(rateHistoryCircuitBreakerService.fixerRateHistory());        
     }
 
 }

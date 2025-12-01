@@ -2,13 +2,17 @@ package com.api.currencyconverterservice.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import com.api.currencyconverterservice.service.CurrencyAPIService;
-import com.api.currencyconverterservice.service.FixerApiService;
+
+import com.api.currencyconverterservice.entity.RecentRateEntity;
+import com.api.currencyconverterservice.repository.RecentRateRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,13 +20,17 @@ import java.util.Map;
 public class ResponseService {
 
     private static final Logger logger = LoggerFactory.getLogger(ResponseService.class);
-
     private final CurrencyAPIService currencyAPIService;
     private final FixerApiService fixerApiService;
+    private final OpenExchangeApiService openExchangeApiService;
+    private final RecentRateRepository recentRateRepository;
 
-    public ResponseService(CurrencyAPIService currencyAPIService, FixerApiService fixerApiService) {
+    public ResponseService(CurrencyAPIService currencyAPIService, FixerApiService fixerApiService, 
+        OpenExchangeApiService openExchangeApiService, RecentRateRepository recentRateRepository) {
         this.currencyAPIService = currencyAPIService;
         this.fixerApiService = fixerApiService;
+        this.openExchangeApiService = openExchangeApiService;
+        this.recentRateRepository = recentRateRepository;
     }
 
     public Mono<Map<String, Object>> convertCurrency(String from, String to, BigDecimal amount) {
@@ -89,5 +97,63 @@ public class ResponseService {
                     response.put("message", "An unexpected error occurred: " + e.getMessage());
                     return Mono.just(response);
                 });
+    }
+
+
+    public Mono<Object> getRates(String base){
+        Mono<String> fixerResponse = fixerApiService.getRates(base);
+        Mono<String> openExchangeResponse = openExchangeApiService.getRates(base);
+
+       return Mono.zip(fixerResponse, openExchangeResponse)
+        .map(tuple -> {
+            String fixerTupple = tuple.getT1();
+            String openExchangeTupple = tuple.getT2();
+
+             // creating a new db instance
+             RecentRateEntity recentRate = new RecentRateEntity();
+                
+            if (!fixerTupple.isEmpty()) {
+
+                // persisting request info to db
+                recentRate.setRequestTime(LocalDateTime.now());
+                 recentRate.setBaseSymbol(base);
+                 recentRate.setStatus(true);
+
+                  // persisting data in a non-blocking way
+                  Mono.fromRunnable(() -> recentRateRepository
+                  .save(recentRate))
+                  .subscribe();
+                    
+                return fixerTupple;
+            } else if (!openExchangeTupple.isEmpty()) {
+                
+                  recentRate.setRequestTime(LocalDateTime.now());
+                  recentRate.setBaseSymbol(base);
+                  recentRate.setStatus(true);
+
+                // persisting data in a non-blocking way
+                  Mono.fromRunnable(() -> recentRateRepository
+                  .save(recentRate))
+                  .subscribe();
+                    return openExchangeTupple;
+            } else {
+                HashMap<String, Object> hm = new HashMap<>();
+                hm.put("message", "Service not available, please try again later");
+
+                recentRate.setRequestTime(LocalDateTime.now());
+                 recentRate.setBaseSymbol(base);
+                 recentRate.setStatus(false);      
+                 Mono.fromRunnable(() -> recentRateRepository.save(recentRate))
+                 .subscribe();
+                return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(hm);
+            }
+        })
+        .onErrorResume(e -> {
+            HashMap<String, Object> hm = new HashMap<>();
+            hm.put("message", "Unexpected error: " + e.getMessage());
+            return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(hm));
+        });
+
+
     }
 }
