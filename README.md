@@ -20,7 +20,10 @@ from=USD&to=EUR&amount=100)
 - Rates history within the last 24 hours (GET api/v1/health)
 
 ## Features
-- Caching (simple in-memory caching)
-- Containerization (Docker)
-- Database for storing recent rate requests
+- Circuit Breaker (Resillience4j Library)
+- Caching (Redis Cache)
+- Containerization (Docker and Docker Compose)
+- Database for storing recent rate requests (JPA/Hibernate)
+- Non-blocking HTTP request (WebClient)
+  
 
